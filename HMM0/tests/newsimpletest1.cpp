@@ -23,6 +23,7 @@ using namespace std;
 
 void test1() {
     read(std::cin);
+    
 }
 
 void test2() {
