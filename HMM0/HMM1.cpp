@@ -15,8 +15,11 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <iomanip>
+
 
 using namespace std;
+
 int input = 3;
 int tranRow;
 int tranCol;
@@ -25,36 +28,78 @@ int obsCol;
 int inRow;
 int inCol;
 
-int print(int row, int col, vector<vector<float>> matrix){
-        for (int l=0; l<row; ++l){
-            for(int m=0;m<col;++m){
+int print(int row, int col, vector<vector<float> > matrix){
+    for (int l=0; l<row; ++l){
+        for(int m=0; m<col;++m){
             cout << matrix[l][m] <<" ";
-            
         }
-            cout << "\n";
+        if(col == 0){
+            cout << matrix[l][0] <<" ";
+        }
+        cout << "\n";
     }
-    
+    return 0;
 }
 
-vector<vector<float>> multiply(int row1, vector<vector<float>> matrix1, int row2, int col2, vector<vector<float>> matrix2){
-
-    vector<vector<float>> resMatrix(row1, std::vector<float>(col2));
-    for(int i=0; i<row1; ++i){
-        for(int j=0;j<col2;++j){           
-            for(int k=0;k<row2;++k){
-                resMatrix[i][j] += matrix1[i][k] * matrix2[k][j];
-            }
-        }
+vector<vector<float> > elemMultiply(vector<vector<float> > matrix1, vector<vector<float> > matrix2){
+    if(matrix1.size() != matrix2.size()){
+        cout << "------- ERROR different matrix sizes elemMultiply";
     }
 
-   // print(row1, col2, resMatrix);
+    vector<vector<float> > resMatrix(matrix1.size(), std::vector<float>(1));
+    for(int i=0; i < matrix1.size(); ++i){
+        resMatrix[i][0] += matrix1[i][0] * matrix2[i][0];
+        //cout << matrix1[i][0] << " * " << matrix2[i][0] << " = " <<  resMatrix[i][0] << " \n";
+    }
+    //print(resMatrix.size(), 1, resMatrix);
+   //cout << "------------------ \n";
     return resMatrix;
     
 }
 
 
-vector<vector<float>> getMatrix(int row, int col, vector<float>& val){
-    vector<vector<float>> resMatrix(row, std::vector<float>(col));
+//get one column from a matrix, 
+vector<vector<float> > getCol(int obs, vector<vector<float> > matrix){
+    int rows = matrix.size();
+    vector<vector<float> > result(rows, std::vector<float>(1));
+    for(int i=0;i<rows;++i){
+        result[i][0] += matrix[i][obs];
+    }
+    return result;
+}
+
+float sum(vector<vector<float> > matrix){
+    float resSum = 0;
+    int rows = matrix.size();
+
+    for(int i=0; i<rows; ++i){
+        resSum += matrix[i][0];
+    }
+    return resSum;
+}
+
+
+vector<vector<float> > multiply(vector<vector<float> > matrix1, vector<vector<float> > matrix2){
+    int row1 = matrix1.size();
+    int row2 = matrix2.size();
+    int col2 = matrix2[0].size();
+
+    //elementärmultiplicera ihop column med matrix 2 sedan summera
+    vector<vector<float> > resMatrix(row1, std::vector<float>(1));
+
+    for (int i = 0; i < row2; ++i){
+        vector<vector<float> > column = getCol(i, matrix1);
+        vector<vector<float> > multi = elemMultiply(column, matrix2);
+        float summ = sum(multi);
+        resMatrix[i][0] += summ;
+    }
+    return resMatrix;
+    
+}
+
+
+vector<vector<float> > getMatrix(int row, int col, vector<float>& val){
+    vector<vector<float> > resMatrix(row, std::vector<float>(col));
     int k=0;
     for (int i=0; i<row; ++i){
         for(int j=0;j<col;++j){
@@ -62,28 +107,9 @@ vector<vector<float>> getMatrix(int row, int col, vector<float>& val){
             ++k;
         }
     }
-    //print(row, col, matrix);
+    //print(row, col, resMatrix);
+    //cout << "------------------ \n";
     return resMatrix;
-}
-
-vector<vector<float>> getCol(int rows, int obs, vector<vector<float>> matrix){
-    vector<vector<float>> result(rows, std::vector<float>(1));
-
-    for(int i=0;i<rows;++i){
-        result[i][1] += matrix[i][obs];
-        cout << matrix[i][obs] <<" ";
-        cout << result[i][1]<<" ";
-    }
-   // print(rows,1,result);
-    return result;
-}
-
-float sum(int obs, vector<vector<float>> matrix){
-    float resSum;
-    for(int i=0;i<obs;++i){
-        resSum += matrix[i][1];
-    }
-    return resSum;
 }
 
 int read2(std::istream&){
@@ -93,7 +119,7 @@ int read2(std::istream&){
     string newline;
     std::cin >> tranRow;
     std::cin >> tranCol;
-
+    //read in vectors transitions, observations, initial
     for (int i=0;i<tranRow*tranCol;++i){
         float value;
         std::cin >> value;
@@ -114,34 +140,38 @@ int read2(std::istream&){
         initial.push_back(value);
     }  
     
-    vector<vector<float>> tranMatrix = getMatrix(tranRow, tranCol, transitions);
-    vector<vector<float>> obsMatrix = getMatrix(obsRow, obsCol, observations);
-    vector<vector<float>> inMatrix = getMatrix(inRow, inCol, initial);
-    //print(tranRow, tranCol, tranMatrix);
+    //turn into matrices
+    vector<vector<float> > tranMatrix = getMatrix(tranRow, tranCol, transitions);
+    vector<vector<float> > obsMatrix = getMatrix(obsRow, obsCol, observations);
+    vector<vector<float> > inMatrix = getMatrix(inCol, inRow, initial);
     
     int nrObs;
     int obs;
     cin >> nrObs;
     cin >> obs;
-    vector<vector<float>> gottenCol = getCol(obsRow, obs, obsMatrix);
-    vector<vector<float>> tempRes = multiply(nrObs, gottenCol, inRow, inCol, inMatrix);
-    print(nrObs, inCol, tempRes);
-//    vector<vector<float>> mult2;
-//    for(int m=0;m<obs-1;++m){
-//        cin>>obs;
-//         vector<vector<float>> mult1 = multiply(nrObs, tempRes, tranRow,tranCol,tranMatrix);
-//         mult2 = multiply(nrObs, getCol(obsRow, obs, obsMatrix), nrObs, 1, mult1);
-//         tempRes = mult2;        
-//    } 
-    //cout<< "SUMMM!: " << sum(nrObs, mult2);
-    
-    //vector<vector<float>> mul1 = multiply(inRow, inMatrix, tranRow, tranCol, tranMatrix);
-    //vector<vector<float>> result = multiply(inRow, mul1, obsRow, obsCol, obsMatrix);
-    //cout << inRow << " "<< obsCol << " ";
-    //print(inRow, obsCol, result);
+    //first elementwise operation
+    vector<vector<float> > column = getCol(obs, obsMatrix);
+    vector<vector<float> > partRes = elemMultiply(inMatrix, column);
+
+    for (int m = 0; m < nrObs-1; ++m){
+        vector<vector<float> > tempMatrix = multiply(tranMatrix, partRes);
+        cin >> obs;
+        // cout << "obs: " << obs << "\n";
+        column = getCol(obs, obsMatrix);
+        partRes = elemMultiply(tempMatrix, column);
+        // print(partRes.size(), 1, partRes);
+        // cout << "------------------ \n";
+    }
+    float summ = sum(partRes);
+
+    cout << summ;
+
+    return 0;
 }
 
 int main(int argc, char** argv) {
+    cout << std::fixed;
+    cout << std::setprecision(6);
     read2(std::cin);
     return 0;
 }
