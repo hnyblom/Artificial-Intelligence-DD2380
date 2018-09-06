@@ -16,6 +16,7 @@
 #include <fstream>
 #include "main.h"
 #include "HMM1.h"
+#include "HMM2.h"
 using namespace std;
 
 /*
