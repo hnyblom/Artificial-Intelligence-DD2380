@@ -29,6 +29,7 @@ int inRow;
 int inCol;
 vector<vector<float> > stateResMatrix;
 int obsCounter = 0;
+string indexString;
 
 int print(int row, int col, vector<vector<float> > matrix){
     for (int l=0; l<row; ++l){
@@ -118,10 +119,13 @@ vector<vector<float> > getMax(vector<vector<float> >  mat){
     vector<vector<float> > resMat(mat.size(), std::vector<float>(1));
     float temp = 0;
     int index = 0;
+    int lastIndex = 0;
+    int largestIndex = 0;
     for(int i=0; i<mat.size();++i){
         for(int j=0;j<mat[0].size();++j){
             if(mat[i][j]>temp){
                 temp = mat[i][j];
+                lastIndex = index;
                 index = j;
                 
             }
@@ -130,11 +134,17 @@ vector<vector<float> > getMax(vector<vector<float> >  mat){
         resMat[i][0] += temp;
         temp=0;
         stateResMatrix[i][obsCounter] += index;
+        cout << " \n index was: "<<index<<"\n";
+        if(index>lastIndex){
+            largestIndex = index;
+        }
+        
         index = 0;
     }
+    indexString += to_string(largestIndex) + " ";
    // print(resMat.size(), resMat[0].size(), resMat);
-    //cout <<"\n------------------\n";
-    //print(stateResMatrix.size(), stateResMatrix[0].size(), stateResMatrix);
+    cout <<"\n--------stateresmatrix----------\n";
+    print(stateResMatrix.size(), stateResMatrix[0].size(), stateResMatrix);
     return resMat;
 }
 int backtrack(int index){
@@ -186,24 +196,36 @@ int read2(std::istream&){
     cin >> nrObs;
     cin >> obs;
     
-    stateResMatrix = vector<vector<float> >(tranRow, std::vector<float>(nrObs));
+    stateResMatrix = vector<vector<float> >(tranRow, std::vector<float>(nrObs+1));
     //first elementwise operation
     vector<vector<float> > column = getCol(obs, obsMatrix);
+     cout << "\n column \n";
+    print(column.size(), column[0].size(), column);
+    cout<<"\n column end \n";
+    
     vector<vector<float> > partRes = elemMultiply(inMatrix, column);
       
+    cout << "\n partRes \n";
+    print(partRes.size(), partRes[0].size(), partRes);
+    cout<<"\n partRes end \n";
     
-    for (int m = 0; m < nrObs-1; ++m){
+    for (int m = 0; m < nrObs; ++m){
         vector<vector<float> > tempMatrix2 (tranRow, std::vector<float>(tranCol));
         cin >>obs;
         obsCounter++;
         for(int n=0;n<tranRow; ++n){
            
             for(int b=0;b<tranCol;++b){
-                tempMatrix2[n][b] += partRes[b][0]*tranMatrix[b][n]*obsMatrix[n][obs];
-
+                cout << "\n m = "<<m<<" n= "<<n<<" b= "<<b<<"\n";
+                cout <<"partres[b][0]= " <<partRes[b][0]<<" tranmatrix[b][n]= "<<tranMatrix[b][n]<<" obsmatrix[n][obs} "<<obsMatrix[n][obs];
+                tempMatrix2[n][b] += partRes[b][0]*tranMatrix[n][b]*obsMatrix[n][obs];
+                cout << " \nresult: "<< tempMatrix2[n][b]<<"\n";
             }
 
         }
+        cout << "\n Tempmatrix2 \n";
+        print(tempMatrix2.size(), tempMatrix2[0].size(), tempMatrix2);
+        cout<<"\n Tempmatrix2 end \n";
         partRes = getMax(tempMatrix2);
         //break;        
 
@@ -217,6 +239,7 @@ int read2(std::istream&){
         }
     }
     backtrack(index);
+    cout << "\n indexstring "<<indexString <<"\n";
     return 0;
 }
 
