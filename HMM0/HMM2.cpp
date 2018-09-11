@@ -6,7 +6,7 @@
 
 /* 
  * File:   HMM1.cpp
- * Author: hanna
+ * Author: Hanna & Nicole
  * 
  * Created on September 4, 2018, 7:51 PM
  */
@@ -29,9 +29,10 @@ int inRow;
 int inCol;
 vector<vector<float> > stateResMatrix;
 int obsCounter = 0;
-string indexString;
 
-int print(int row, int col, vector<vector<float> > matrix){
+int print(vector<vector<float> > matrix){
+    int row = matrix.size();
+    int col = matrix[0].size();
     for (int l=0; l<row; ++l){
         for(int m=0; m<col;++m){
             cout << matrix[l][m] <<" ";
@@ -52,10 +53,7 @@ vector<vector<float> > elemMultiply(vector<vector<float> > matrix1, vector<vecto
     vector<vector<float> > resMatrix(matrix1.size(), std::vector<float>(1));
     for(int i=0; i < matrix1.size(); ++i){
         resMatrix[i][0] += matrix1[i][0] * matrix2[i][0];
-        //cout << matrix1[i][0] << " * " << matrix2[i][0] << " = " <<  resMatrix[i][0] << " \n";
     }
-    //print(resMatrix.size(), 1, resMatrix);
-   //cout << "------------------ \n";
     return resMatrix;
     
 }
@@ -110,8 +108,6 @@ vector<vector<float> > getMatrix(int row, int col, vector<float>& val){
             ++k;
         }
     }
-    //print(row, col, resMatrix);
-    //cout << "------------------ \n";
     return resMatrix;
 }
 
@@ -119,52 +115,44 @@ vector<vector<float> > getMax(vector<vector<float> >  mat){
     vector<vector<float> > resMat(mat.size(), std::vector<float>(1));
     float temp = 0;
     int index = 0;
-    int lastIndex = 0;
-    int largestIndex = 0;
     for(int i=0; i<mat.size();++i){
         for(int j=0;j<mat[0].size();++j){
             if(mat[i][j]>temp){
                 temp = mat[i][j];
-                lastIndex = index;
                 index = j;
                 
             }
-           //temp= max(mat[i][j], temp);
         }
         resMat[i][0] += temp;
         temp=0;
         stateResMatrix[i][obsCounter] += index;
-        cout << " \n index was: "<<index<<"\n";
-        if(index>lastIndex){
-            largestIndex = index;
-        }
-        
         index = 0;
     }
-    indexString += to_string(largestIndex) + " ";
-   // print(resMat.size(), resMat[0].size(), resMat);
-    cout <<"\n--------stateresmatrix----------\n";
-    print(stateResMatrix.size(), stateResMatrix[0].size(), stateResMatrix);
     return resMat;
 }
 int backtrack(int index){
-    cout<<"-----\n";
-    cout << index;
+    std::vector<int> path =  vector<int>();
+    path.push_back(index);
+
     for(int i=stateResMatrix[0].size()-1;i>0; --i){
-        cout<<"\nhär\n";
-         cout << stateResMatrix[index][i];
-         
+        path.push_back(stateResMatrix[index][i]);
+         index = stateResMatrix[index][i];
     }
+
+     cout  << path[path.size()-1];
+    for (int j = path.size()-2; j >= 0; --j){
+        cout << " " << path[j];
+    }
+    return 0;
     
 }
 int read2(std::istream&){
-    
-    std::vector<float> transitions;
-    std::vector<float> observations;
-    std::vector<float> initial;
+    vector<float> transitions;
+    vector<float> observations;
+    vector<float> initial;
     string newline;
-    std::cin >> tranRow;
-    std::cin >> tranCol;
+    cin >> tranRow;
+    cin >> tranCol;
     //read in vectors transitions, observations, initial
     for (int i=0;i<tranRow*tranCol;++i){
         float value;
@@ -196,40 +184,25 @@ int read2(std::istream&){
     cin >> nrObs;
     cin >> obs;
     
-    stateResMatrix = vector<vector<float> >(tranRow, std::vector<float>(nrObs+1));
+    stateResMatrix = vector<vector<float> >(tranRow, std::vector<float>(nrObs));
     //first elementwise operation
     vector<vector<float> > column = getCol(obs, obsMatrix);
-     cout << "\n column \n";
-    print(column.size(), column[0].size(), column);
-    cout<<"\n column end \n";
-    
     vector<vector<float> > partRes = elemMultiply(inMatrix, column);
       
-    cout << "\n partRes \n";
-    print(partRes.size(), partRes[0].size(), partRes);
-    cout<<"\n partRes end \n";
     
-    for (int m = 0; m < nrObs; ++m){
+    for (int m = 0; m < nrObs-1; ++m){
         vector<vector<float> > tempMatrix2 (tranRow, std::vector<float>(tranCol));
         cin >>obs;
         obsCounter++;
         for(int n=0;n<tranRow; ++n){
            
             for(int b=0;b<tranCol;++b){
-                cout << "\n m = "<<m<<" n= "<<n<<" b= "<<b<<"\n";
-                cout <<"partres[b][0]= " <<partRes[b][0]<<" tranmatrix[b][n]= "<<tranMatrix[b][n]<<" obsmatrix[n][obs} "<<obsMatrix[n][obs];
-                tempMatrix2[n][b] += partRes[b][0]*tranMatrix[n][b]*obsMatrix[n][obs];
-                cout << " \nresult: "<< tempMatrix2[n][b]<<"\n";
+                tempMatrix2[n][b] += partRes[b][0]*tranMatrix[b][n]*obsMatrix[n][obs];
             }
-
         }
-        cout << "\n Tempmatrix2 \n";
-        print(tempMatrix2.size(), tempMatrix2[0].size(), tempMatrix2);
-        cout<<"\n Tempmatrix2 end \n";
         partRes = getMax(tempMatrix2);
-        //break;        
-
     }
+
     float temp=0;
     int index=0;
     for(int s =0;s<partRes.size();++s){       
@@ -239,13 +212,10 @@ int read2(std::istream&){
         }
     }
     backtrack(index);
-    cout << "\n indexstring "<<indexString <<"\n";
     return 0;
 }
 
 int main(int argc, char** argv) {
-    //cout << std::fixed;
-    //cout << std::setprecision(6);
     read2(std::cin);
     return 0;
 }
