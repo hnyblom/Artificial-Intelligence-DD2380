@@ -33,7 +33,6 @@ vector<vector<float> > obsMatrix;
 vector<vector<float> > inMatrix;
 vector<vector<float> > partRes;
 vector<vector<float> > backPartRes;
-vector<vector<float> > gamma;
 int obsCounter = 0;
 
 int print(vector<vector<float> > matrix){
@@ -197,26 +196,27 @@ float forwardAlgorithm(vector<float> obsSeq, vector<vector<float> > obsMatrix, v
 }
 vector<float> flipObs(vector<float> obsSeq){
     vector<float> backObsSeq(obsSeq);
-    vector<vector<float> > backStart(obsSeq, std::vector<float>(1));
+
+    vector<vector<float> > backStart(obsSeq.size(), std::vector<float>(1));
     for(int i=0; i<obsSeq.size(); ++i){     
         //Flippar på observation sequence
-        backObsSeq[obsSeq.size-1-i]=obsSeq[i];
+        backObsSeq[obsSeq.size()-1-i]=obsSeq[i];
     }
     return backObsSeq;
 }
 
 float backwardAlgorithm(vector<float> obsSeq, vector<vector<float> > obsMatrix, vector<vector<float> > tranMatrix, vector<vector<float> > inMatrix){
-    vector<vector<float> > backStart(obsSeq, std::vector<float>(1));
+    vector<vector<float> > backStart(obsSeq.size(), std::vector<float>(1));
     for(int i=0; i<obsSeq.size(); ++i){
         //Fyller vektor med ettor 
-        backStart[i]=1;
+        backStart[i].push_back(1);
     }
    backPartRes = backStart;
    vector<float> backObsSeq = flipObs(obsSeq);
    
    for (int m = 0; m < obsSeq.size()-1; ++m){
        vector<vector<float> > tempMatrix = rowMultiply(tranMatrix, backPartRes);
-       column = getCol(backObsSeq[m], obsMatrix);
+       vector<vector<float> > column = getCol(backObsSeq[m], obsMatrix);
        backPartRes = elemMultiply(tempMatrix, column);
  
    }
@@ -226,22 +226,24 @@ float backwardAlgorithm(vector<float> obsSeq, vector<vector<float> > obsMatrix, 
    return summ;
 
 }
-vector<float> gamma(vector<float> obsSeq, vector<vector<float>> tranM, vector<vector<float>> obsM, vector<vector<float>> inM){
+float gamma(vector<float> obsSeq, vector<vector<float> > tranM, float frontSum){
     float denom = 0;
     int nrStates = tranM.size();
-    vector<float> gammaRes;
+    //vector<float> gammaRes;
     vector<float> backObsSeq = flipObs(obsSeq);
     vector<float> newObs;
+    float gammaRes;
     
-    for(int t=0;t<obsSeq.size(); ++t){
+    //for(int t=0;t<obsSeq.size(); ++t){
         for(int i=0;i<nrStates; ++i){
             
-            for(int j=0;j<nrStates;++j){
+            //for(int j=0;j<nrStates;++j){
+                gammaRes += (partRes.at(i)).at(1) * (backPartRes.at(i)).at(1) / frontSum;
                 
-                denom = denom + forwardAlgorithm(obsSeq, obsM, tranM, inM)*backwardAlgoritm();
             }
-        }
-    }
+        //}
+   // }
+    return gammaRes;
 }
 
 int read3(std::istream&){
@@ -293,7 +295,7 @@ int read3(std::istream&){
    vector<vector<float>> diGammaRes(partRes.size());
    
    //Nr of observations is nr of rows in transitionmatrix
-   gamma(obsSeq, tranMatrix, obsMatrix, inMatrix);
+   gamma(obsSeq, tranMatrix, forwSum);
    
 //   for(int p=0;p<partRes.size();++p){
 //       float temp = partRes[p]*backPartRes[p];
