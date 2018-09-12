@@ -6,6 +6,7 @@
                    projectFiles="true">
       <itemPath>HMM1.h</itemPath>
       <itemPath>HMM2.h</itemPath>
+      <itemPath>HMM3.h</itemPath>
       <itemPath>main.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -15,8 +16,26 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="HMM0" displayName="HMM0" projectFiles="true">
+        <logicalFolder name="dist" displayName="dist" projectFiles="true">
+          <logicalFolder name="Debug" displayName="Debug" projectFiles="true">
+            <logicalFolder name="GNU-Linux" displayName="GNU-Linux" projectFiles="true">
+              <itemPath>dist/Debug/GNU-Linux/hmm0</itemPath>
+            </logicalFolder>
+          </logicalFolder>
+        </logicalFolder>
+        <logicalFolder name="samples(1)" displayName="samples(1)" projectFiles="true">
+          <itemPath>samples(1)/sample_00.ans</itemPath>
+        </logicalFolder>
+        <itemPath>.dep.inc</itemPath>
+        <itemPath>Makefile</itemPath>
+        <itemPath>output</itemPath>
+        <itemPath>sample_00.in</itemPath>
+        <itemPath>samples(1).zip</itemPath>
+      </logicalFolder>
       <itemPath>HMM1.cpp</itemPath>
       <itemPath>HMM2.cpp</itemPath>
+      <itemPath>HMM3.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -37,6 +56,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="1">
@@ -47,6 +69,8 @@
       </toolsSet>
       <compileType>
       </compileType>
+      <item path=".dep.inc" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="HMM1.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="HMM1.h" ex="false" tool="3" flavor2="0">
@@ -54,6 +78,14 @@
       <item path="HMM2.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="HMM2.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="HMM3.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="HMM3.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Makefile" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="dist/Debug/GNU-Linux/hmm0" ex="false" tool="3" flavor2="0">
       </item>
       <folder path="TestFiles/f1">
         <cTool>
@@ -73,6 +105,14 @@
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="output" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sample_00.in" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="samples(1).zip" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="samples(1)/sample_00.ans" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/newsimpletest1.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -97,6 +137,8 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path=".dep.inc" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="HMM1.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="HMM1.h" ex="false" tool="3" flavor2="0">
@@ -104,6 +146,14 @@
       <item path="HMM2.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="HMM2.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="HMM3.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="HMM3.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Makefile" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="dist/Debug/GNU-Linux/hmm0" ex="false" tool="3" flavor2="0">
       </item>
       <folder path="TestFiles/f1">
         <cTool>
@@ -123,6 +173,14 @@
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="main.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="output" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="sample_00.in" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="samples(1).zip" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="samples(1)/sample_00.ans" ex="false" tool="3" flavor2="0">
       </item>
       <item path="tests/newsimpletest1.cpp" ex="false" tool="1" flavor2="0">
       </item>

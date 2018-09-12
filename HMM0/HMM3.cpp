@@ -31,6 +31,9 @@ vector<vector<float> > stateResMatrix;
 vector<vector<float> > tranMatrix;
 vector<vector<float> > obsMatrix;
 vector<vector<float> > inMatrix;
+vector<vector<float> > partRes;
+vector<vector<float> > backPartRes;
+vector<vector<float> > gamma;
 int obsCounter = 0;
 
 int print(vector<vector<float> > matrix){
@@ -71,6 +74,15 @@ vector<vector<float> > getCol(int obs, vector<vector<float> > matrix){
     }
     return result;
 }
+//get one row from a matrix, 
+vector<vector<float> > getRow(int obs, vector<vector<float> > matrix){
+    int cols = matrix[0].size();
+    vector<vector<float> > result(cols, std::vector<float>(1));
+    for(int i=0;i<cols;++i){
+        result[i][0] += matrix[obs][i];
+    }
+    return result;
+}
 
 float sum(vector<vector<float> > matrix){
     float resSum = 0;
@@ -100,7 +112,23 @@ vector<vector<float> > multiply(vector<vector<float> > matrix1, vector<vector<fl
     return resMatrix;
     
 }
+vector<vector<float> > rowMultiply(vector<vector<float> > matrix1, vector<vector<float> > matrix2){
+    int row1 = matrix1.size();
+    int row2 = matrix2.size();
+    int col2 = matrix2[0].size();
 
+    //elementärmultiplicera ihop row med matrix 2 sedan summera
+    vector<vector<float> > resMatrix(row1, std::vector<float>(1));
+
+    for (int i = 0; i < col2; ++i){
+        vector<vector<float> > row = getRow(i, matrix1);
+        vector<vector<float> > multi = elemMultiply(row, matrix2);
+        float summ = sum(multi);
+        resMatrix[i][0] += summ;
+    }
+    return resMatrix;
+    
+}
 
 vector<vector<float> > getMatrix(int row, int col, vector<float>& val){
     vector<vector<float> > resMatrix(row, std::vector<float>(col));
@@ -150,10 +178,71 @@ int backtrack(int index){
 }
 
 
-int forwardalgorithm(vector<float> obsSequence, int nrObs){
+float forwardAlgorithm(vector<float> obsSeq, vector<vector<float> > obsMatrix, vector<vector<float> > tranMatrix, vector<vector<float> > inMatrix){
+   vector<vector<float> > column = getCol(obsSeq[0], obsMatrix);
+   //c0 = partRes
+   partRes = elemMultiply(inMatrix, column);
+
+   for (int m = 0; m < obsSeq.size()-1; ++m){
+       vector<vector<float> > tempMatrix = multiply(tranMatrix, partRes);
+       column = getCol(obsSeq[m+1], obsMatrix);
+       partRes = elemMultiply(tempMatrix, column);
+ 
+   }
+   float summ = sum(partRes);
+
+   cout << summ;
+   return summ;
 
 }
+vector<float> flipObs(vector<float> obsSeq){
+    vector<float> backObsSeq(obsSeq);
+    vector<vector<float> > backStart(obsSeq, std::vector<float>(1));
+    for(int i=0; i<obsSeq.size(); ++i){     
+        //Flippar på observation sequence
+        backObsSeq[obsSeq.size-1-i]=obsSeq[i];
+    }
+    return backObsSeq;
+}
 
+float backwardAlgorithm(vector<float> obsSeq, vector<vector<float> > obsMatrix, vector<vector<float> > tranMatrix, vector<vector<float> > inMatrix){
+    vector<vector<float> > backStart(obsSeq, std::vector<float>(1));
+    for(int i=0; i<obsSeq.size(); ++i){
+        //Fyller vektor med ettor 
+        backStart[i]=1;
+    }
+   backPartRes = backStart;
+   vector<float> backObsSeq = flipObs(obsSeq);
+   
+   for (int m = 0; m < obsSeq.size()-1; ++m){
+       vector<vector<float> > tempMatrix = rowMultiply(tranMatrix, backPartRes);
+       column = getCol(backObsSeq[m], obsMatrix);
+       backPartRes = elemMultiply(tempMatrix, column);
+ 
+   }
+   float summ = sum(backPartRes);
+
+   cout << summ;
+   return summ;
+
+}
+vector<float> gamma(vector<float> obsSeq, vector<vector<float>> tranM, vector<vector<float>> obsM, vector<vector<float>> inM){
+    float denom = 0;
+    int nrStates = tranM.size();
+    vector<float> gammaRes;
+    vector<float> backObsSeq = flipObs(obsSeq);
+    vector<float> newObs;
+    
+    for(int t=0;t<obsSeq.size(); ++t){
+        for(int i=0;i<nrStates; ++i){
+            
+            for(int j=0;j<nrStates;++j){
+                
+                denom = denom + forwardAlgorithm(obsSeq, obsM, tranM, inM)*backwardAlgoritm();
+            }
+        }
+    }
+}
 
 int read3(std::istream&){
     vector<float> transitions;
@@ -189,28 +278,35 @@ int read3(std::istream&){
 
        
    int nrObs;
-   int obs;
    cin >> nrObs;
-   cin >> obs;
-   //first elementwise operation
-   vector<vector<float> > column = getCol(obs, obsMatrix);
-   vector<vector<float> > partRes = elemMultiply(inMatrix, column);
-
-   for (int m = 0; m < nrObs-1; ++m){
-       vector<vector<float> > tempMatrix = multiply(tranMatrix, partRes);
-       cin >> obs;
-       // cout << "obs: " << obs << "\n";
-       column = getCol(obs, obsMatrix);
-       partRes = elemMultiply(tempMatrix, column);
-       // print(partRes.size(), 1, partRes);
-       // cout << "------------------ \n";
+   int obs;
+   vector<float> obsSeq(nrObs);
+   for(int n = 0; n<nrObs; ++n){
+        cin >> obs;
+        obsSeq[n] = obs;
    }
-   float summ = sum(partRes);
-
-   cout << summ;
+   float forwSum = forwardAlgorithm(obsSeq, obsMatrix, tranMatrix, inMatrix);
+   float backSum = backwardAlgorithm(obsSeq, obsMatrix, tranMatrix, inMatrix);
+   
+   //gamma = för varje värde i partres/backbartres, multiplicera och dela med forwardSum
+   vector<vector<float>> gammaRes(partRes.size());
+   vector<vector<float>> diGammaRes(partRes.size());
+   
+   //Nr of observations is nr of rows in transitionmatrix
+   gamma(obsSeq, tranMatrix, obsMatrix, inMatrix);
+   
+//   for(int p=0;p<partRes.size();++p){
+//       float temp = partRes[p]*backPartRes[p];
+//       temp = temp/forwardSum;
+//       gammaRes[p]=temp;
+//       diGammaRes[p] = temp*pa
+//   }
+   
+   
 
     return 0;
-}
+}    
+    
 
 int main(int argc, char** argv) {
     read3(std::cin);

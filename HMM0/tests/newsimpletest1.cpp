@@ -17,6 +17,7 @@
 #include "main.h"
 #include "HMM1.h"
 #include "HMM2.h"
+#include "HMM3.h"
 using namespace std;
 
 /*
@@ -24,7 +25,7 @@ using namespace std;
  */
 
 void test1() {
-    read2(std::cin);
+    read3(std::cin);
     
 }
 

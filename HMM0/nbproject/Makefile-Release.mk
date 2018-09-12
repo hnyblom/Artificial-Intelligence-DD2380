@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/HMM1.o \
 	${OBJECTDIR}/HMM2.o \
+	${OBJECTDIR}/HMM3.o \
 	${OBJECTDIR}/main.o
 
 # Test Directory
@@ -83,6 +84,11 @@ ${OBJECTDIR}/HMM2.o: HMM2.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HMM2.o HMM2.cpp
+
+${OBJECTDIR}/HMM3.o: HMM3.cpp
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HMM3.o HMM3.cpp
 
 ${OBJECTDIR}/main.o: main.cpp
 	${MKDIR} -p ${OBJECTDIR}
@@ -131,6 +137,19 @@ ${OBJECTDIR}/HMM2_nomain.o: ${OBJECTDIR}/HMM2.o HMM2.cpp
 	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HMM2_nomain.o HMM2.cpp;\
 	else  \
 	    ${CP} ${OBJECTDIR}/HMM2.o ${OBJECTDIR}/HMM2_nomain.o;\
+	fi
+
+${OBJECTDIR}/HMM3_nomain.o: ${OBJECTDIR}/HMM3.o HMM3.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/HMM3.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -O2 -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/HMM3_nomain.o HMM3.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/HMM3.o ${OBJECTDIR}/HMM3_nomain.o;\
 	fi
 
 ${OBJECTDIR}/main_nomain.o: ${OBJECTDIR}/main.o main.cpp 
