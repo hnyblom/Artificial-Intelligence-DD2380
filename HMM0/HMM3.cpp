@@ -114,7 +114,7 @@ int main(int argc, char **argv){
   int M = obsCol; //number observation symbols
   
 
-  int maxiter = 10000;
+  int maxiter = 30;
   int iter = 0;
   double logProb = 0;
   double oldLogProb = -INFINITY;
@@ -142,17 +142,10 @@ int main(int argc, char **argv){
 
 
   //doing the actual stuff from stamp
-  while((iter < maxiter) && (logProb > oldLogProb)){
+  while((iter < maxiter) && logProb> oldLogProb ){
     //----------Alfa forward-----------------------------------------------------------------------------
     //alfa 0
-    oldLogProb = logProb;
     c[0] = 0;
-    cout<<"\n--------tranTest----\n";
-    print(tranMatrix);
-    cout<<"\n--------obsTest----\n";
-    print(obsMatrix);
-    cout<<"\n--------inTest----\n";
-    print(pi);
     
     for(int i=0;i<N;++i){
       alfa[0][i] = pi[0][i]*obsMatrix[i][obsSeq[0]];
@@ -215,23 +208,14 @@ int main(int argc, char **argv){
         gamma[t][i] = 0;
         for(int j=0;j<N;++j){
           digamma[t][i][j] = (alfa[t][i] * tranMatrix[i][j] * obsMatrix[j][obsSeq[t+1]] * beta[t+1][j]) / denom;
-          
-//          cout<< "\n----alfa------\n";
-//          cout<< alfa[t][i];
-//          cout<< "\n----tran------\n";
-//          cout<< tranMatrix[i][j];
-//          cout<< "\n----obsMatrix------\n";
-//          cout<< obsMatrix[j][obsSeq[t+1]];
-//          cout<< "\n----beta------\n";
-//          cout<< beta[t+1][j];
-//          cout<< "\n---------------\n";
-          
           gamma[t][i] += digamma[t][i][j];
           
         }
       }
     }
-    //Special case gamma t-1(i)
+
+
+    //Special case gamma T-1(i)
     double denom =0;
     for(int i=0;i<N;++i){
         denom += alfa[T-1][i];
@@ -240,68 +224,57 @@ int main(int argc, char **argv){
         gamma[T-1][i] = alfa[T-1][i]/denom;
     }
     
-//    cout<<"\n----------printing gamma-------\n";
-//    print(gamma);
+
     //-------------------------------------do estimations-------------------------------------------------------------------
-    //Re-estimate pi
-    for(int i=0;i<N;++i){
+    //Re-estimate pi - initial matrix 
+    for(int i=0; i<N; ++i){
         pi[0][i] = gamma[0][i];
     }
-    //Re-estimate A
-    for(int i=0;i<N;++i){
-        for(int j=0;j<N;++j){
+
+
+    //Re-estimate A - transitionmatrix
+    for(int i=0; i<N; ++i){
+        for(int j=0; j<N; ++j){
             double numer = 0;
             double denom = 0;
-            for(int t=0;t<T-1;++t){
-                
-//                cout<< "\n----digamma------\n";
-//                cout<< digamma[t][i][j];
-//                cout<< "\n----gamma------\n";
-//                cout<< gamma[t][i];
-              
-                numer += digamma[t][i][j];
-                denom += gamma[t][i];
-                
-//                cout<< "\n----numer------\n";
-//                cout<< numer;
-//                cout<< "\n----denom------\n";
-//                cout<< denom;
-//                cout<< "\n----numer/denom------\n";
-//                cout<< numer/denom;
-                        
+            for(int t=0; t<T-1; ++t){
+              numer += digamma[t][i][j];
+              denom += gamma[t][i];     
             }
-            tranMatrix[i][j] = numer/denom;
+            tranMatrix[i][j] = numer/denom;  //kan vara avrundning här på division med små tal som blir fel?
         }
     }
-    //Re-estimate B
-    for(int i=0;i<N;++i){
-        for(int j=0;j<M;++j){
+    //Re-estimate B - observationmatrix
+    for(int i=0; i<N; ++i){
+        for(int j=0; j<M; ++j){
             double numer =0;
             double denom =0;
-            for(int t=0;t<T;++t){
+            for(int t=0; t<T; ++t){ 
                 if(obsSeq[t] == j){
                     numer += gamma[t][i];
                 }
                 denom += gamma[t][i];
             }
-
-            obsMatrix[i][j] = numer/denom;
-
+            obsMatrix[i][j] = numer/denom; //kan vara avrundning här på division med små tal som blir fel?
         }
     }
+
+
     //Compute log
+    double logProb= 0;   //fucking hell 
     for(int i=0;i<T;++i){
         logProb += log(c[i]);
     }
-    logProb = logProb * (-1);
+    logProb = logProb*(-1);
 
+
+    oldLogProb = logProb;  //kanske blir fel vid första loopen? 
     ++iter;
     
   }
 
   // //Print matrix
- //cout<<"\n------result-------\n";
- //printResult(tranMatrix, obsMatrix);
+ printResult(tranMatrix, obsMatrix);
 
   return 0;
 }
