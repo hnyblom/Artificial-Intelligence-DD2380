@@ -5,6 +5,7 @@
 #include <string>
 #include <iomanip>
 #include <cmath>
+#include <fstream>
 
 using namespace std;
 
@@ -32,6 +33,15 @@ int print(vector<vector<double> > matrix){
       }
       cout << "\n";
   }
+  return 0;
+}
+int printV(vector<double> vect){
+  int col = vect.size();
+      for(int m=0; m<col;++m){
+          cout << vect[m] <<" ";
+      }
+      cout << "\n";
+  
   return 0;
 }
 
@@ -68,6 +78,8 @@ int printResult(vector<vector<double> > tranMatrix, vector<vector<double> >  obs
 
 //read in matrices from inputfile. Transition matrix, observation matrix and initial matrix (pi)
 int readMatrices(){
+        cout<<"\nReading\n";
+
   vector<double> transitions;
   vector<double> observations;
   vector<double> initial;
@@ -81,6 +93,7 @@ int readMatrices(){
       cin >> value;
       transitions.push_back(value);
   }
+    cout<<"\n trans done \n";
 
   cin >> obsRow;
   cin >> obsCol;
@@ -89,6 +102,7 @@ int readMatrices(){
       cin >> value;
       observations.push_back(value);
   }
+    cout<<"\n obs done \n";
 
   cin >> inRow;
   cin >> inCol;
@@ -97,6 +111,7 @@ int readMatrices(){
       cin >> value;
       initial.push_back(value);
   }  
+    cout<<"\n in done \n";
 
   //turn into matrices
   tranMatrix = getMatrix(tranRow, tranCol, transitions);
@@ -121,14 +136,32 @@ int main(int argc, char **argv){
   
   //read in observationsequence
    cin >> T;
-   int obs;
-   vector<double> obsSeq(T);
-   for(int n = 0; n<T; ++n){
-        cin >> obs;
-        obsSeq[n] = obs;
-   }
-   
-  //computed matrices alfa-forward, beta-backward
+   //int obs;
+   vector<double> obsSeq;
+       cout<<"\n obsseq start \n";
+       
+//cin too slow for 10000 observations, need to read from file
+       
+//   ios_base::sync_with_stdio(false); 
+//   cin.tie(NULL);  
+//   for(int n = 0; n<T; ++n){
+//        cin >> obs;
+//        obsSeq[n] = obs;
+//        if(n==(100||200||300||400||500)){
+//            cout<<"\n working on obsseq, n is: "<<n<<"\n";
+//        }
+//   }
+ 
+    string line;
+    std::ifstream myfile("hmm_c_N10000.in", std::ios::in);
+    if(myfile.is_open()){
+        double obs;
+        while( myfile>>obs ){
+            obsSeq.push_back(obs);
+        }
+    }
+
+//computed matrices alfa-forward, beta-backward
   vector<double> c(T, 0.0); //scaling
   vector<vector<double> > alfa(T, vector<double>(N));
   vector<vector<double> > beta(T, vector<double>(N));
@@ -146,11 +179,13 @@ int main(int argc, char **argv){
     //----------Alfa forward-----------------------------------------------------------------------------
     //alfa 0
     c[0] = 0;
-    
+        cout<<"\n Alfa \n";
+
     for(int i=0;i<N;++i){
       alfa[0][i] = pi[0][i]*obsMatrix[i][obsSeq[0]];
       c[0] += alfa[0][i];
     }
+        cout<<"\n Scale \n";
 
     //scale
     c[0] = 1.0/c[0];
@@ -177,6 +212,7 @@ int main(int argc, char **argv){
     }
 
     //----------Beta backward------------------------------------------------
+        cout<<"\n Beta \n";
 
     for(int i=0;i<N;++i){    
       beta[T-1][i] = c[T-1];
@@ -195,6 +231,7 @@ int main(int argc, char **argv){
     }
 
   //---------digamma & gamma------------------------------------------------------------------------------
+        cout<<"\n Gamma \n";
 
     for(int t=0;t<(T-1);++t){
       double denom = 0;
@@ -213,6 +250,7 @@ int main(int argc, char **argv){
         }
       }
     }
+        cout<<"\n Special \n";
 
 
     //Special case gamma T-1(i)
@@ -227,9 +265,12 @@ int main(int argc, char **argv){
 
     //-------------------------------------do estimations-------------------------------------------------------------------
     //Re-estimate pi - initial matrix 
+            cout<<"\n reestimate pi \n";
+
     for(int i=0; i<N; ++i){
         pi[0][i] = gamma[0][i];
     }
+        cout<<"\n Reestimate a\n";
 
 
     //Re-estimate A - transitionmatrix
@@ -245,6 +286,8 @@ int main(int argc, char **argv){
         }
     }
     //Re-estimate B - observationmatrix
+                cout<<"\n reestimate b \n";
+
     for(int i=0; i<N; ++i){
         for(int j=0; j<M; ++j){
             double numer =0;
@@ -259,6 +302,7 @@ int main(int argc, char **argv){
         }
     }
 
+        cout<<"\n log \n";
 
     //Compute log
     double logProb= 0;   //fucking hell 
@@ -274,6 +318,7 @@ int main(int argc, char **argv){
   }
 
   // //Print matrix
+  cout<<"\nprinting result\n";
  printResult(tranMatrix, obsMatrix);
 
   return 0;
