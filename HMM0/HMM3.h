@@ -14,7 +14,8 @@
 #ifndef HMM3_H
 #define HMM3_H
 
-int read3(std::istream&);
+
+//int read3(std::istream&);
 
 #endif /* HMM2_H */
 
